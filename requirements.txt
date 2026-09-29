@@ -1,0 +1,9 @@
+# Mirror pineado de las dependencias de pyproject.toml.
+# Tras crear el entorno virtual e instalar con `pip install -e .`,
+# regenerar este archivo con: pip freeze > requirements.txt
+supervision>=0.24.0
+ultralytics>=8.3.0
+fast-alpr>=0.4.0
+opencv-python-headless>=4.10.0
+pyyaml>=6.0
+numpy>=1.26

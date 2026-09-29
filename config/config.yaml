@@ -1,0 +1,39 @@
+# Configuración base del pipeline LPR.
+# Cambiar source.type/path_or_url es lo único necesario para pasar
+# de un video de prueba a una cámara real.
+
+source:
+  type: "file"                 # "file" | "rtsp"
+  path_or_url: "data/videos/sample_entrada.mp4"
+  source_id: "camera_principal"
+  loop: true                   # solo aplica a type: file, útil para pruebas repetidas
+  reconnect_delay_seconds: 5.0
+  max_reconnect_attempts: -1   # -1 = reintentar indefinidamente (para rtsp)
+
+models:
+  vehicle_detector_weights: "models/yolov8n.pt"
+  vehicle_confidence_threshold: 0.4
+  nms_threshold: 0.5
+  vehicle_classes: ["car", "motorcycle", "bus", "truck"]
+  # fast-alpr usa sus propios modelos ONNX por defecto si se deja en null;
+  # sobreescribir aquí solo si se usan modelos personalizados.
+  plate_detector_model: null
+  ocr_model: null
+
+line_zones:
+  - name: "linea_entrada_principal"
+    start: [0, 480]
+    end: [1280, 480]
+    in_label: "entrada"
+    out_label: "salida"
+
+database:
+  path: "db/lpr.db"
+
+snapshots:
+  enabled: true
+  directory: "data/snapshots"
+
+runtime:
+  preview: false
+  log_level: "INFO"

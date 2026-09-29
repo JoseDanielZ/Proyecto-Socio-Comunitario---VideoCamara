@@ -1,0 +1,35 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# Datos del proyecto (no van al control de versiones)
+models/*.pt
+models/*.onnx
+models/*.engine
+data/videos/*
+!data/videos/.gitkeep
+data/snapshots/*
+!data/snapshots/.gitkeep
+db/*.db
+db/*.db-wal
+db/*.db-shm
+!db/.gitkeep
+
+# Variables de entorno / credenciales (ej. RTSP con usuario/clave)
+.env
+
+# Editor / SO
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Artefactos de tests
+.pytest_cache/
+.coverage
+htmlcov/
