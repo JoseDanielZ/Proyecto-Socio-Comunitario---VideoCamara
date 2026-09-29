@@ -60,7 +60,11 @@ class Pipeline:
 
     def process(self, frame: np.ndarray) -> sv.Detections:
         detections = self._detector.detect(frame)
-        detections = self._tracker.update_with_detections(detections)
+        detections = self._tracker.update(detections)
+        # ByteTrackTracker devuelve también las detecciones aún no
+        # confirmadas con tracker_id=-1; se excluyen para que no se
+        # fusionen entre sí en el conteo de cruces.
+        detections = detections[detections.tracker_id != -1]
 
         for crossing in self._line_zones.trigger(detections):
             self._handle_crossing(frame, detections, crossing)

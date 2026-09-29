@@ -45,10 +45,20 @@ class FastAlprOCR:
 
         def _confidence(result) -> float:
             ocr = getattr(result, "ocr", None)
-            return getattr(ocr, "confidence", 0.0) if ocr else 0.0
+            return _normalize_confidence(getattr(ocr, "confidence", None)) if ocr else 0.0
 
         best = max(results, key=_confidence)
         ocr = getattr(best, "ocr", None)
         if ocr is None:
             return None, None
-        return getattr(ocr, "text", None), getattr(ocr, "confidence", None)
+        return getattr(ocr, "text", None), _normalize_confidence(getattr(ocr, "confidence", None))
+
+
+def _normalize_confidence(confidence) -> Optional[float]:
+    """fast-alpr puede devolver la confianza como un solo float o como una
+    lista de confianzas por carácter; la BD guarda un único valor (promedio)."""
+    if confidence is None:
+        return None
+    if isinstance(confidence, (list, tuple)):
+        return float(sum(confidence) / len(confidence)) if confidence else None
+    return float(confidence)

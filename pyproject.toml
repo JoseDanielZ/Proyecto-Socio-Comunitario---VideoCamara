@@ -5,8 +5,10 @@ description = "Base de reconocimiento de placas (ALPR) para registro de entrada/
 requires-python = ">=3.11"
 dependencies = [
     "supervision>=0.24.0",
+    "trackers>=2.0.0",
     "ultralytics>=8.3.0",
     "fast-alpr>=0.4.0",
+    "onnxruntime>=1.18.0",  # fast-alpr no lo declara como dependencia obligatoria
     "opencv-python-headless>=4.10.0",
     "pyyaml>=6.0",
     "numpy>=1.26",

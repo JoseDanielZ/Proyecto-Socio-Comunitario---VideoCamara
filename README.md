@@ -7,15 +7,15 @@ sobre [`supervision`](https://github.com/roboflow/supervision) (detección/track
 
 ## Requisitos
 
-- **Python 3.11 o 3.12 recomendado.** Este equipo solo tenía Python 3.14.3 instalado al
-  crear el proyecto; Python 3.14 es muy reciente y algunas librerías de OCR/CV pueden no
-  tener wheels publicados todavía para esa versión, causando fallos en `pip install`.
-  - Recomendado: instalar Python 3.12 aparte (`winget install Python.Python.3.12` o desde
-    [python.org](https://www.python.org/)) y crear el entorno virtual con esa versión:
-    `py -3.12 -m venv .venv`.
-  - Alternativa: seguir con Python 3.14 en modo CPU (sin GPU) — funciona para probar el
-    pipeline contra archivos de video, pero si `pip install` falla en alguna dependencia,
-    es la primera causa a revisar.
+- **Python 3.11+.** El proyecto se desarrolló y probó de extremo a extremo con Python
+  3.14.3 en modo CPU (sin GPU) en Windows — funciona, pero con una salvedad conocida:
+  el pin `numpy<2.0` que se suele recomendar para máxima compatibilidad **no tiene wheel
+  para Python 3.14** y falla al compilar desde código fuente (requiere un compilador C que
+  no viene instalado por defecto en Windows). La solución ya aplicada en `pyproject.toml`
+  es no fijar el techo de versión de numpy (`numpy>=1.26`), lo cual instala NumPy 2.x, que
+  sí trae wheel para 3.14 y es compatible con el resto de dependencias.
+  - Si se prefiere GPU o máxima compatibilidad de wheels, Python 3.11/3.12 siguen siendo
+    una alternativa válida (`py -3.12 -m venv .venv`), pero no es obligatorio.
 - Windows, Linux o macOS (el código no depende del sistema operativo).
 
 ## Instalación
