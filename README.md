@@ -5,6 +5,40 @@ cada entrada/salida (fecha, hora, placa) en un conjunto residencial. Construido
 sobre [`supervision`](https://github.com/roboflow/supervision) (detección/tracking/anotación),
 `ultralytics` (YOLO) y `fast-alpr` (detección + OCR de placa).
 
+## Sistema del conjunto (API + web)
+
+Además del motor de visión, el repositorio incluye el sistema completo para el conjunto: una
+**API REST** (`backend/`, FastAPI, Clean Architecture) y una **web adaptada a celular**
+(`frontend/`, React). Tres módulos sobre la misma base:
+
+| Módulo | Qué resuelve |
+|---|---|
+| Cámaras y accesos | Procesa el video, guarda cada vehículo que cruza (hora, tipo, color, placa, foto) y muestra el **video en vivo con cajas y conteo** |
+| Visitas, deliveries y proveedores | El guardia registra el ingreso (p. ej. moto de Uber) y el sistema lo **respalda con lo que vio la cámara**; avisa las motos que la cámara vio y nadie registró |
+| Tickets | Solicitudes y daños con seguimiento hasta resolverse (abierto → en proceso → resuelto → cerrado) |
+
+Arranque en desarrollo (dos terminales, desde la raíz del proyecto):
+
+```powershell
+# 1) Backend: API en http://localhost:8000  (documentación interactiva en /docs)
+.venv\Scripts\Activate.ps1
+python -m lpr.download_models                         # una vez: detector para vista aérea
+cd backend
+python -m app.scripts.seed_demo --demo                # una vez: usuarios y datos de ejemplo
+python -m uvicorn app.main:create_app --factory --port 8000
+
+# 2) Frontend: web en http://localhost:5173
+cd frontend
+npm install                                           # una vez
+npm run dev
+```
+
+Usuarios de ejemplo (cambiarlos antes de usar en serio): `admin / admin123` (administración) y
+`guardia1 / guardia123` (guardia). Detalle de la arquitectura, permisos y configuración:
+[backend/README.md](backend/README.md) y [frontend/README.md](frontend/README.md).
+
+Pruebas: `pytest` (motor de visión + backend) y `cd frontend && npm test`.
+
 ## Requisitos
 
 - **Python 3.11+.** El proyecto se desarrolló y probó de extremo a extremo con Python
@@ -117,6 +151,9 @@ Detalle de cada caso, entornos y qué modelo usar según la escena: [casos/READM
 ## Estructura del proyecto
 
 ```
+backend/                API REST del sistema del conjunto (FastAPI, Clean Architecture)
+frontend/               Web en React adaptada a celular
+casos/                  Casos de uso copiados de supervision (velocidad, zonas, mapa de calor...)
 config/config.yaml     Configuración: fuente de video, modelos, líneas, base de datos
 src/lpr/
   main.py               Punto de entrada (CLI)

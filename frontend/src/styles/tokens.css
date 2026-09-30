@@ -1,0 +1,31 @@
+:root {
+  /* Marca: blanco con verde */
+  --pine: #0d5c3a;
+  --pine-deep: #0a4a2f;
+  --leaf: #2f9e62;
+  --mist: #f1f5f2;
+  --paper: #ffffff;
+  --line: #d5dfd8;
+  --ink: #12241a;
+  --ink-soft: #4a5d52;
+
+  /* Veredictos y estados (siempre acompañados de texto o icono) */
+  --ok-fg: #14633a;
+  --ok-bg: #dff1e6;
+  --warn-fg: #7a4b00;
+  --warn-bg: #fcecc8;
+  --bad-fg: #a3211a;
+  --bad-bg: #fbe3e0;
+  --info-fg: #1a4f8b;
+  --info-bg: #e2edf9;
+  --quiet-fg: #3d4f45;
+  --quiet-bg: #e6ece8;
+
+  --font: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --radius-panel: 14px;
+  --radius-control: 10px;
+  --tap: 3rem; /* alto mínimo de todo lo tocable: 48 px */
+  --tabs-height: 4.25rem;
+  --gutter: 1rem;
+}

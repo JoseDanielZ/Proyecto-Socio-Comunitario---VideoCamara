@@ -46,3 +46,9 @@ casos/*/*.mov
 # Videos anotados generados por las pruebas (pesan decenas de MB)
 data/output/*
 !data/output/.gitkeep
+
+# Frontend (React)
+node_modules/
+frontend/dist/
+frontend/.env
+frontend/*.tsbuildinfo

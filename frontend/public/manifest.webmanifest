@@ -1,0 +1,11 @@
+{
+  "name": "Conjunto",
+  "short_name": "Conjunto",
+  "description": "Cámaras, visitas y tickets del conjunto",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f1f5f2",
+  "theme_color": "#0d5c3a",
+  "lang": "es",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

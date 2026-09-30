@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class Pipeline:
-    def __init__(self, config: Config, frame_rate: float = 25.0):
+    def __init__(self, config: Config, frame_rate: float = 25.0, repository=None):
         self._config = config
         self._detector = VehicleDetector(
             weights_path=config.models.vehicle_detector_weights,
@@ -42,7 +42,10 @@ class Pipeline:
             if config.models.plate_ocr_enabled
             else None
         )
-        self._repository = EventRepository(config.database.path)
+        # 'repository' permite inyectar otro destino para los eventos (cualquier objeto con
+        # insert(event: Event)); el backend lo usa para guardarlos en su propia base de datos.
+        self._owns_repository = repository is None
+        self._repository = repository or EventRepository(config.database.path)
         self._snapshots_dir = Path(config.snapshots.directory)
         if config.snapshots.enabled:
             self._snapshots_dir.mkdir(parents=True, exist_ok=True)
@@ -104,7 +107,8 @@ class Pipeline:
         detections.data["vehicle_type"] = np.array(types, dtype=object)
 
     def close(self) -> None:
-        self._repository.close()
+        if self._owns_repository:
+            self._repository.close()
 
     def __enter__(self) -> "Pipeline":
         return self
