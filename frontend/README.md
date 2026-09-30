@@ -5,22 +5,29 @@ botones de 48 px, texto grande) y adaptada a escritorio (menú lateral).
 
 ## Comandos
 
+Desde la raíz del proyecto (es un monorepo con npm workspaces; un solo `npm install`):
+
 ```powershell
-cd frontend
 npm install
-npm run dev        # http://localhost:5173 (reenvía /api al backend en el puerto 8000)
-npm run build      # revisa tipos y genera dist/
-npm test           # vitest
+npm run dev                          # API + web (http://localhost:5173, reenvía /api al puerto 8000)
+npm run dev -w @conjunto/frontend    # solo la web
+npm run build -w @conjunto/frontend  # revisa tipos y genera dist/
+npm test -w @conjunto/frontend       # vitest
 ```
 
 El backend debe estar corriendo (ver el README de la raíz). Para probar desde el celular en la misma red:
-`npm run dev -- --host` y abrir `http://IP-DEL-PC:5173`.
+`npm run dev -w @conjunto/frontend -- --host` y abrir `http://IP-DEL-PC:5173`.
+
+## Tipos de la API
+
+`src/api/types.ts` no define tipos: reexporta los de `@conjunto/contracts`, el mismo paquete que usa el backend
+para validar y responder. Si el backend cambia un campo, esta web deja de compilar hasta adaptarse.
 
 ## Estructura
 
 ```text
 src/
-  api/          cliente HTTP (sesión, errores legibles), tipos y endpoints
+  api/          cliente HTTP (sesión, errores legibles), endpoints; tipos = contrato compartido
   auth/         contexto de sesión (sessionStorage) y cierre automático si vence
   components/   Shell (menú), Verdict (resultado de la cámara), ui (chips, filas, video en vivo)
   pages/        Inicio, Visitas (lista, nueva, detalle), Cámara, Accesos, Tickets, Usuarios

@@ -12,18 +12,12 @@ dependencies = [
     "opencv-python-headless>=4.10.0",
     "pyyaml>=6.0",
     "huggingface_hub>=0.24.0",  # descarga del detector aéreo (lpr.download_models)
-    # Backend del sistema del conjunto (backend/)
-    "fastapi>=0.115",
-    "uvicorn[standard]>=0.30",
-    "sqlalchemy>=2.0",
-    "pyjwt>=2.8",
-    "bcrypt>=4.1",
-    "python-dotenv>=1.0",
+    "httpx>=0.27",  # el puente (lpr.bridge) envía eventos y video al backend Node
     "numpy>=1.26",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-cov", "httpx>=0.27"]
+dev = ["pytest>=8.0", "pytest-cov"]
 preview = ["opencv-python>=4.10.0"]
 
 [build-system]
@@ -34,6 +28,5 @@ build-backend = "hatchling.build"
 packages = ["src/lpr"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "backend/tests"]
-pythonpath = ["backend"]
+testpaths = ["tests"]
 norecursedirs = ["_upstream", "casos", ".venv", ".venv-casos", "data", "models", "frontend", "node_modules"]

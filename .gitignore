@@ -52,3 +52,9 @@ node_modules/
 frontend/dist/
 frontend/.env
 frontend/*.tsbuildinfo
+
+# Base de datos del backend Node y sus archivos auxiliares
+db/*.sqlite
+db/*.sqlite-wal
+db/*.sqlite-shm
+backend/.env

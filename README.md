@@ -7,37 +7,44 @@ sobre [`supervision`](https://github.com/roboflow/supervision) (detección/track
 
 ## Sistema del conjunto (API + web)
 
-Además del motor de visión, el repositorio incluye el sistema completo para el conjunto: una
-**API REST** (`backend/`, FastAPI, Clean Architecture) y una **web adaptada a celular**
-(`frontend/`, React). Tres módulos sobre la misma base:
+Además del motor de visión, el repositorio incluye el sistema completo para el conjunto, todo en
+**TypeScript** salvo el motor de visión (Python):
+
+| Parte | Carpeta | Qué es |
+|---|---|---|
+| Contrato | `packages/contracts` | Los tipos de la API (esquemas zod), compartidos por backend y frontend |
+| Backend | `backend/` | API REST en Node.js + Express + SQLite |
+| Frontend | `frontend/` | Web en React adaptada a celular |
+| Motor de visión | `src/lpr/` | Python (YOLO): detecta vehículos y los envía al backend con `lpr.bridge` |
+
+Tres módulos sobre la misma base:
 
 | Módulo | Qué resuelve |
 |---|---|
-| Cámaras y accesos | Procesa el video, guarda cada vehículo que cruza (hora, tipo, color, placa, foto) y muestra el **video en vivo con cajas y conteo** |
+| Cámaras y accesos | Guarda cada vehículo que cruza (hora, tipo, color, placa, foto) y muestra el **video en vivo con cajas y conteo** |
 | Visitas, deliveries y proveedores | El guardia registra el ingreso (p. ej. moto de Uber) y el sistema lo **respalda con lo que vio la cámara**; avisa las motos que la cámara vio y nadie registró |
 | Tickets | Solicitudes y daños con seguimiento hasta resolverse (abierto → en proceso → resuelto → cerrado) |
 
-Arranque en desarrollo (dos terminales, desde la raíz del proyecto):
+Arranque en desarrollo (desde la raíz del proyecto):
 
 ```powershell
-# 1) Backend: API en http://localhost:8000  (documentación interactiva en /docs)
+# Una vez
+npm install                                   # instala backend, frontend y contrato
+copy backend\.env.example backend\.env        # completar JWT_SECRET e INGEST_API_KEY (ver el archivo)
 .venv\Scripts\Activate.ps1
-python -m lpr.download_models                         # una vez: detector para vista aérea
-cd backend
-python -m app.scripts.seed_demo --demo                # una vez: usuarios y datos de ejemplo
-python -m uvicorn app.main:create_app --factory --port 8000
+python -m lpr.download_models                 # detector para vista aérea
+npm run seed -- --demo                        # usuarios y datos de ejemplo
 
-# 2) Frontend: web en http://localhost:5173
-cd frontend
-npm install                                           # una vez
-npm run dev
+# Cada vez (dos terminales)
+npm run dev                                   # API en :8000 y web en http://localhost:5173
+python -m lpr.bridge --loop                   # cámara de prueba: envía eventos y video a la API
 ```
 
 Usuarios de ejemplo (cambiarlos antes de usar en serio): `admin / admin123` (administración) y
-`guardia1 / guardia123` (guardia). Detalle de la arquitectura, permisos y configuración:
+`guardia1 / guardia123` (guardia). Detalle de arquitectura, permisos y configuración:
 [backend/README.md](backend/README.md) y [frontend/README.md](frontend/README.md).
 
-Pruebas: `pytest` (motor de visión + backend) y `cd frontend && npm test`.
+Pruebas: `npm test` (contrato, backend y frontend) y `pytest` (motor de visión y puente).
 
 ## Requisitos
 
@@ -151,7 +158,8 @@ Detalle de cada caso, entornos y qué modelo usar según la escena: [casos/READM
 ## Estructura del proyecto
 
 ```
-backend/                API REST del sistema del conjunto (FastAPI, Clean Architecture)
+backend/                API REST del sistema del conjunto (Node.js + TypeScript)
+packages/contracts/     Tipos de la API compartidos entre backend y frontend
 frontend/               Web en React adaptada a celular
 casos/                  Casos de uso copiados de supervision (velocidad, zonas, mapa de calor...)
 config/config.yaml     Configuración: fuente de video, modelos, líneas, base de datos

@@ -1,0 +1,17 @@
+{
+  "name": "@conjunto/contracts",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Contrato de la API: esquemas zod y tipos compartidos por backend y frontend",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
