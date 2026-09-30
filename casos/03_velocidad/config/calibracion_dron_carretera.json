@@ -1,0 +1,6 @@
+{
+  "_comentario": "Video dron 1280x720. source: 4 puntos de la imagen (rectángulo sobre los 3 carriles de abajo), en el orden que hace que el eje Y del destino siga la dirección de la marcha (aquí, la horizontal de la imagen). target_width/height en METROS. Escala APROXIMADA: un auto mide ~4,5 m y ocupa ~125 px (~0,036 m/px) -> 320 px de ancho ~ 11 m, 1080 px de largo ~ 40 m. Medir en el terreno para datos reales. Ojo: el dron se mueve, la velocidad es respecto a la cámara.",
+  "source": [[100, 240], [100, 560], [1180, 560], [1180, 240]],
+  "target_width": 11,
+  "target_height": 40
+}

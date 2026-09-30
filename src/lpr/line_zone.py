@@ -23,7 +23,13 @@ class LineZoneManager:
         self._entries = [
             (
                 cfg,
-                sv.LineZone(start=sv.Point(*cfg.start), end=sv.Point(*cfg.end)),
+                sv.LineZone(
+                    start=sv.Point(*cfg.start),
+                    end=sv.Point(*cfg.end),
+                    # Cuenta cuando el centro del vehículo cruza; con las 4
+                    # esquinas (default) un vehículo largo tarda en contarse.
+                    triggering_anchors=[sv.Position.CENTER],
+                ),
             )
             for cfg in configs
         ]

@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS events (
     plate_text        TEXT,
     plate_confidence  REAL,
     vehicle_type      TEXT NOT NULL,
+    vehicle_color     TEXT,
     direction         TEXT NOT NULL CHECK (direction IN ('entrada', 'salida')),
     tracker_id        INTEGER,
     source_id         TEXT NOT NULL,
@@ -30,6 +31,7 @@ class Event:
     timestamp: str
     plate_text: Optional[str] = None
     plate_confidence: Optional[float] = None
+    vehicle_color: Optional[str] = None
     tracker_id: Optional[int] = None
     snapshot_path: Optional[str] = None
     id: Optional[int] = None
@@ -43,20 +45,29 @@ class EventRepository:
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.executescript(_SCHEMA)
+        self._migrate()
         self._conn.commit()
+
+    def _migrate(self) -> None:
+        # Bases creadas antes de existir vehicle_color no la tienen, y
+        # CREATE TABLE IF NOT EXISTS no altera tablas existentes.
+        columns = {row["name"] for row in self._conn.execute("PRAGMA table_info(events)")}
+        if "vehicle_color" not in columns:
+            self._conn.execute("ALTER TABLE events ADD COLUMN vehicle_color TEXT")
 
     def insert(self, event: Event) -> int:
         cursor = self._conn.execute(
             """
             INSERT INTO events (
-                plate_text, plate_confidence, vehicle_type, direction,
+                plate_text, plate_confidence, vehicle_type, vehicle_color, direction,
                 tracker_id, source_id, timestamp, snapshot_path
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 event.plate_text,
                 event.plate_confidence,
                 event.vehicle_type,
+                event.vehicle_color,
                 event.direction,
                 event.tracker_id,
                 event.source_id,

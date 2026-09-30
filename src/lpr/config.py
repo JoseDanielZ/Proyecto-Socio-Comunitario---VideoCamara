@@ -53,9 +53,11 @@ class ModelsConfig:
     vehicle_detector_weights: str = "models/yolov8n.pt"
     vehicle_confidence_threshold: float = 0.4
     nms_threshold: float = 0.5
+    imgsz: int = 640
     vehicle_classes: list[str] = field(
         default_factory=lambda: ["car", "motorcycle", "bus", "truck"]
     )
+    plate_ocr_enabled: bool = True
     plate_detector_model: str | None = None
     ocr_model: str | None = None
 

@@ -30,6 +30,51 @@ def test_insert_and_query_roundtrip(tmp_path: Path):
     repo.close()
 
 
+def test_vehicle_color_roundtrip(tmp_path: Path):
+    repo = EventRepository(tmp_path / "test.db")
+    repo.insert(
+        Event(
+            vehicle_type="car",
+            vehicle_color="amarillo",
+            direction="entrada",
+            source_id="camera_principal",
+            timestamp="2026-09-29T10:00:00+00:00",
+        )
+    )
+    assert repo.get_last_events(limit=1)[0]["vehicle_color"] == "amarillo"
+    repo.close()
+
+
+def test_migrates_legacy_db_without_vehicle_color(tmp_path: Path):
+    import sqlite3
+
+    db_path = tmp_path / "legacy.db"
+    conn = sqlite3.connect(db_path)
+    conn.execute(
+        """CREATE TABLE events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, plate_text TEXT, plate_confidence REAL,
+            vehicle_type TEXT NOT NULL,
+            direction TEXT NOT NULL CHECK (direction IN ('entrada', 'salida')),
+            tracker_id INTEGER, source_id TEXT NOT NULL, timestamp TEXT NOT NULL,
+            snapshot_path TEXT)"""
+    )
+    conn.commit()
+    conn.close()
+
+    repo = EventRepository(db_path)
+    repo.insert(
+        Event(
+            vehicle_type="car",
+            vehicle_color="azul",
+            direction="salida",
+            source_id="camera_principal",
+            timestamp="2026-09-29T10:00:00+00:00",
+        )
+    )
+    assert repo.get_last_events(limit=1)[0]["vehicle_color"] == "azul"
+    repo.close()
+
+
 def test_insert_event_without_plate(tmp_path: Path):
     db_path = tmp_path / "test.db"
     repo = EventRepository(db_path)

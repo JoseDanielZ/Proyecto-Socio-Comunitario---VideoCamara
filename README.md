@@ -8,7 +8,7 @@ sobre [`supervision`](https://github.com/roboflow/supervision) (detección/track
 ## Requisitos
 
 - **Python 3.11+.** El proyecto se desarrolló y probó de extremo a extremo con Python
-  3.14.3 en modo CPU (sin GPU) en Windows — funciona, pero con una salvedad conocida:
+  3.14.3 en Windows (CPU y GPU NVIDIA) — funciona, pero con una salvedad conocida:
   el pin `numpy<2.0` que se suele recomendar para máxima compatibilidad **no tiene wheel
   para Python 3.14** y falla al compilar desde código fuente (requiere un compilador C que
   no viene instalado por defecto en Windows). La solución ya aplicada en `pyproject.toml`
@@ -30,29 +30,67 @@ pip install -e ".[dev,preview]"
 dependencias de testing (`pytest`) y la build de OpenCV con soporte de ventana (para
 `--preview`). En un servidor sin pantalla, basta con `pip install -e .`.
 
-Los pesos del detector de vehículos (`yolov8n.pt`) y los modelos de `fast-alpr` se
-descargan automáticamente la primera vez que se ejecuta el pipeline (ver `models/README.md`).
+### Usar la GPU NVIDIA (mucho más rápido)
+
+`pip install` trae PyTorch solo para CPU. Con una GPU NVIDIA, instalar la build con CUDA en el
+mismo entorno (no hay que cambiar código: ultralytics usa la GPU automáticamente):
+
+```bash
+pip install "torch==2.14.0+cu130" "torchvision==0.29.0+cu130" --index-url https://download.pytorch.org/whl/cu130 --extra-index-url https://pypi.org/simple
+python -c "import torch; print(torch.cuda.is_available())"   # debe imprimir True
+```
+
+Medido en una RTX 4050 Laptop sobre el video de prueba (346 frames, 1280x720): el pipeline
+principal pasó de ~2 min 10 s en CPU a ~16 s en GPU con el mismo resultado; el caso `tracking`
+de 4 min 40 s a 24 s. `cu130` requiere un driver con CUDA 13; con drivers más viejos usar `cu126`.
+El mismo comando sirve para `.venv-casos`.
+
+Los modelos de `fast-alpr` se descargan solos la primera vez que se usa el OCR de placas.
+El detector de vehículos para **vista aérea (dron)** se baja con:
+
+```bash
+python -m lpr.download_models     # guarda models/geotrax_hbb_yolov8s_1920_v1.pt (~25 MB)
+```
+
+(Modelo [`rfonod/geo-trax`](https://huggingface.co/rfonod/geo-trax), CC BY 4.0. Los modelos
+COCO como `yolov8n.pt` ven muy pocos autos desde arriba; sirven para cámaras a nivel de calle,
+con `imgsz: 640` en `config.yaml`.)
 
 ## Uso rápido con un video de prueba (sin cámara)
 
-1. Colocar un video corto de un vehículo entrando/saliendo en `data/videos/` (por ejemplo
-   `data/videos/sample_entrada.mp4`, que es el nombre por defecto en `config/config.yaml`).
-2. Verificar que `config/config.yaml` tenga `source.type: "file"` apuntando a ese archivo.
-3. Correr con vista de depuración para calibrar la línea de conteo contra la resolución real
-   del video:
+1. Colocar el video en `data/videos/` y apuntar `source.path_or_url` en `config/config.yaml`
+   (viene configurado `data/videos/215295_medium.mp4`, una carretera vista desde un dron).
+2. Poner la línea de conteo en `line_zones` (`start`/`end` en píxeles del video; en el ejemplo
+   es vertical en x=640 porque el tráfico va de lado a lado).
+3. Correr con ventana en vivo (`q` para cerrar) y guardando el video anotado:
 
    ```bash
-   python -m lpr.main --config config/config.yaml --preview
+   python -m lpr.main --config config/config.yaml --preview --output data/output/resultado.mp4
    ```
 
-   Se abrirá una ventana con las cajas de detección, el ID de tracking de cada vehículo y la
-   línea de entrada/salida con su conteo. Ajustar `line_zones.start`/`end` en `config.yaml`
-   hasta que la línea quede bien ubicada, y presionar `q` para cerrar.
+   Se dibuja cada vehículo con `#id tipo color`, su estela de movimiento, la línea de conteo y un
+   panel con el total de vehículos que la cruzaron, por tipo y por color. Al terminar se imprime
+   el listado de cada vehículo contado. Un vehículo se cuenta una sola vez (su primer cruce).
 4. Revisar los eventos registrados:
 
    ```bash
-   sqlite3 db/lpr.db "select * from events;"
+   sqlite3 db/conteo_carretera.db "select tracker_id, vehicle_type, vehicle_color, direction from events;"
    ```
+
+## Casos de uso (copiados de supervision)
+
+Además del cruce de línea con tipo y color, el proyecto incluye en `casos/` otros escenarios ya
+codificados (tracking, flujo entre zonas, velocidad, tiempo en zona, conteo por zona, mapa de
+calor), cada uno en su carpeta y lanzable con un solo comando:
+
+```powershell
+python -m lpr.casos list
+python -m lpr.casos run flujo --video data/videos/215295_medium.mp4 `
+  --weights models/geotrax_hbb_yolov8s_1920_v1.pt `
+  --config casos/02_flujo_vehicular/config/zonas_dron_carretera.json
+```
+
+Detalle de cada caso, entornos y qué modelo usar según la escena: [casos/README.md](casos/README.md).
 
 ## Pasar a una cámara real (RTSP)
 
@@ -88,6 +126,8 @@ src/lpr/
   tracking.py              Tracking (ByteTrack) para no contar dos veces el mismo vehículo
   line_zone.py             Línea de conteo, mapeo a entrada/salida
   plate_detector.py         Recorte del vehículo para pasar al motor de placa
+  color.py                    Color dominante del vehículo (HSV)
+  download_models.py          Descarga del detector aéreo
   ocr.py                     Lectura de la placa (fast-alpr), interfaz intercambiable
   pipeline.py                Orquesta todo el flujo por frame
   db.py                       Esquema SQLite y repositorio de eventos
@@ -108,6 +148,7 @@ Tabla `events` en SQLite (`db/lpr.db`):
 | `plate_text` | Texto de la placa leído (o `NULL` si no se pudo leer) |
 | `plate_confidence` | Confianza del OCR |
 | `vehicle_type` | `car`, `motorcycle`, `bus` o `truck` |
+| `vehicle_color` | Color dominante (blanco, negro, gris, rojo, azul, celeste, amarillo...) |
 | `direction` | `entrada` o `salida` |
 | `tracker_id` | ID de tracking asignado por ByteTrack |
 | `source_id` | Identificador de la cámara/fuente configurada |

@@ -1,0 +1,14 @@
+# Dependencias comunes de los casos (entorno aparte: .venv-casos).
+# 'inference' (variantes inference_*.py, Roboflow Inference) no se instala: no tiene
+# versión para Python 3.14 y además exige una API key de Roboflow.
+supervision>=0.30.0
+trackers>=2.0.0
+ultralytics>=8.3.0
+rfdetr
+jsonargparse[signatures]
+gdown
+tqdm
+requests
+opencv-python>=4.10.0
+huggingface_hub
+pyyaml

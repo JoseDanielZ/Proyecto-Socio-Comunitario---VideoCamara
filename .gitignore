@@ -34,3 +34,15 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Casos de uso (copias de supervision) y su clon completo
+_upstream/
+.venv-casos/
+casos/*/data/
+casos/*/*.pt
+casos/*/*.mp4
+casos/*/*.mov
+
+# Videos anotados generados por las pruebas (pesan decenas de MB)
+data/output/*
+!data/output/.gitkeep

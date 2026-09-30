@@ -11,6 +11,7 @@ dependencies = [
     "onnxruntime>=1.18.0",  # fast-alpr no lo declara como dependencia obligatoria
     "opencv-python-headless>=4.10.0",
     "pyyaml>=6.0",
+    "huggingface_hub>=0.24.0",  # descarga del detector aéreo (lpr.download_models)
     "numpy>=1.26",
 ]
 
@@ -24,3 +25,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/lpr"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["_upstream", "casos", ".venv", ".venv-casos", "data", "models"]

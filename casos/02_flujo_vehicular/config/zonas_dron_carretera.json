@@ -1,0 +1,11 @@
+{
+  "_comentario": "Video dron 1280x720. Par 1: carriles de abajo, tráfico de derecha a izquierda. Par 2: carril de arriba. zone_in[i] -> zone_out[i]. Máximo 4 pares.",
+  "zone_in": [
+    [[880, 240], [1250, 240], [1250, 560], [880, 560]],
+    [[880, 10], [1250, 10], [1250, 140], [880, 140]]
+  ],
+  "zone_out": [
+    [[30, 240], [400, 240], [400, 560], [30, 560]],
+    [[30, 10], [400, 10], [400, 140], [30, 140]]
+  ]
+}
